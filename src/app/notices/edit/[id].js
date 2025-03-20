@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import NoticeForm from '@/components/NoticeForm';
 
-export default function EditNoticePage({ params }) {
+export default function EditNoticePage() {
   const [error, setError] = useState('');
   const [user, setUser] = useState(null);
   const [notice, setNotice] = useState(null);
