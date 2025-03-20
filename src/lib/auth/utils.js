@@ -47,3 +47,9 @@ export function generateToken(user) {
 export function verifyToken(token) {
   return jwt.verify(token, config.jwt.secret);
 }
+
+function verifyAuth(req) {
+  // ...existing logic...
+}
+
+export { verifyAuth };

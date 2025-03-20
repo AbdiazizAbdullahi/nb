@@ -119,3 +119,5 @@ export class NoticeModel {
     return collection.deleteOne({ _id: new ObjectId(id) });
   }
 }
+
+export default NoticeModel;
