@@ -7,6 +7,11 @@ export default function NoticeCard({ notice, onEdit, onDelete, isAdmin, archived
     });
   };
 
+  const handleExport = async () => {
+    const { generateNoticePDF } = await import('@/lib/pdf/generateNoticePDF');
+    generateNoticePDF(notice);
+  };
+
   return (
     <div className={`bg-white rounded-lg shadow-md p-6 mb-4 ${archived ? 'opacity-75' : ''}`}>
       <div className="flex justify-between items-start">
@@ -28,16 +33,23 @@ export default function NoticeCard({ notice, onEdit, onDelete, isAdmin, archived
             {archived && <p className="mt-2 text-amber-600">Archived</p>}
           </div>
         </div>
-        {isAdmin && !archived && (
-          <div className="flex space-x-2">
+        <div className="flex flex-row justify-center items-center space-x-2">
+          <button
+            onClick={handleExport}
+            className="text-sm text-blue-600 hover:text-blue-800"
+            title="Export as PDF"
+          >
+            Export
+          </button>
+          {isAdmin && !archived && (
             <button
               onClick={() => onDelete(notice._id)}
-              className="px-3 py-1 text-sm text-red-600 hover:text-red-800"
+              className="text-sm text-red-600 hover:text-red-800"
             >
               Delete
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
