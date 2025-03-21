@@ -35,6 +35,11 @@ export default function Home() {
 
   const handleDelete = async (noticeId) => {
     const token = localStorage.getItem('token');
+    if (!token) {
+      setError('You must be logged in to delete notices');
+      return;
+    }
+
     try {
       const response = await fetch(`/api/notices/${noticeId}`, {
         method: 'DELETE',
@@ -42,14 +47,17 @@ export default function Home() {
           'Authorization': `Bearer ${token}`,
         },
       });
-
+      
       const data = await response.json();
+      
       if (data.success) {
+        // Only update the UI if delete was successful
         setNotices(notices.filter(notice => notice._id !== noticeId));
       } else {
-        setError(data.error.message);
+        setError(data.error.message || 'Failed to delete notice');
       }
     } catch (err) {
+      console.error('Delete error:', err);
       setError('Failed to delete notice');
     }
   };

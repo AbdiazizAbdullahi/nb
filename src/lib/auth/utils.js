@@ -48,8 +48,21 @@ export function verifyToken(token) {
   return jwt.verify(token, config.jwt.secret);
 }
 
-function verifyAuth(req) {
-  // ...existing logic...
+/**
+ * Verify authentication token and return user data
+ * @param {string} token - The JWT token to verify
+ * @returns {Object|null} The decoded user data or null if invalid
+ */
+export function verifyAuth(token) {
+  try {
+    if (!token) return null;
+    const decoded = verifyToken(token);
+    return {
+      id: decoded.id,
+      email: decoded.email,
+      isSuperAdmin: decoded.isSuperAdmin
+    };
+  } catch (error) {
+    return null;
+  }
 }
-
-export { verifyAuth };

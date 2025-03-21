@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/db/mongodb';
-import Notice from '@/models/Notice';
+import clientPromise from '@/lib/db/mongodb';
+import { NoticeModel } from '@/models/Notice';
 import { verifyAuth } from '@/lib/auth/utils';
 
 export async function GET(request, { params }) {
   try {
-    await dbConnect();
-    const notice = await Notice.findById(params.id);
+    const id = await params.id;
+    const client = await clientPromise;
+    const notice = await NoticeModel.findById(id);
     
     if (!notice) {
       return NextResponse.json({
@@ -29,6 +30,7 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
+    const id = await params.id;
     const token = request.headers.get('authorization')?.split(' ')[1];
     const user = await verifyAuth(token);
 
@@ -40,13 +42,8 @@ export async function PUT(request, { params }) {
     }
 
     const body = await request.json();
-    await dbConnect();
-
-    const notice = await Notice.findByIdAndUpdate(
-      params.id,
-      { ...body },
-      { new: true, runValidators: true }
-    );
+    const client = await clientPromise;
+    const notice = await NoticeModel.update(id, body);
 
     if (!notice) {
       return NextResponse.json({
@@ -69,9 +66,17 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
+    const id = await params.id;  // Await the dynamic parameter
+    
     const token = request.headers.get('authorization')?.split(' ')[1];
-    const user = await verifyAuth(token);
+    if (!token) {
+      return NextResponse.json({
+        success: false,
+        error: { message: 'No token provided' }
+      }, { status: 401 });
+    }
 
+    const user = await verifyAuth(token);
     if (!user?.isSuperAdmin) {
       return NextResponse.json({
         success: false,
@@ -79,10 +84,10 @@ export async function DELETE(request, { params }) {
       }, { status: 403 });
     }
 
-    await dbConnect();
-    const notice = await Notice.findByIdAndDelete(params.id);
-
-    if (!notice) {
+    const client = await clientPromise;
+    const result = await NoticeModel.delete(id);
+    
+    if (!result.deletedCount) {
       return NextResponse.json({
         success: false,
         error: { message: 'Notice not found' }
@@ -91,9 +96,10 @@ export async function DELETE(request, { params }) {
 
     return NextResponse.json({
       success: true,
-      data: notice
+      data: { id }  // Use the awaited id
     });
   } catch (error) {
+    console.error('Delete error:', error);
     return NextResponse.json({
       success: false,
       error: { message: 'Failed to delete notice' }
