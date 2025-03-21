@@ -1,24 +1,24 @@
 'use client';
-
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from './Navbar';
+import { useAuthStore } from '@/stores/authStore';
 
 export default function ClientLayout({ children }) {
-  const [user, setUser] = useState(null);
   const router = useRouter();
+  const { user, setUser, clearUser } = useAuthStore();
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
-  }, []);
+  }, [setUser]);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
-    setUser(null);
+    clearUser();
     router.push('/login');
   };
 
